@@ -60,7 +60,9 @@ export async function runDetectionPipeline(
   if (extractedUrls.length > 0 && process.env.VIRUSTOTAL_API_KEY) {
     try {
       const { checkUrlVirusTotal } = await import("./virustotalService");
+      console.log("[VT] Checking URL:", extractedUrls[0]);
       virustotalResult = await checkUrlVirusTotal(extractedUrls[0]);
+      console.log("[VT] Result:", JSON.stringify(virustotalResult, null, 2));
       if (virustotalResult && virustotalResult.malicious > 0) {
         flags.push({
           type: "VIRUSTOTAL_MALICIOUS",
@@ -68,8 +70,8 @@ export async function runDetectionPipeline(
           score: 40,
         });
       }
-    } catch {
-      // VirusTotal is optional — silently degrade
+    } catch (err) {
+      console.error("[VT] Error:", err);
     }
   }
 
@@ -91,27 +93,27 @@ export async function runDetectionPipeline(
   }
 
   // ── 6. Ollama AI classification ───────────────────────────
-try {
-  const { classifyWithOllama } = await import("./ollamaService");
-  aiClassification = (await classifyWithOllama(text)) ?? undefined;
-  if (aiClassification === "PHISHING") {
-    flags.push({
-      type: "AI_PHISHING",
-      detail: "AI model (Llama3) classified this message as PHISHING",
-      score: 30,
-    });
+  try {
+    const { classifyWithOllama } = await import("./ollamaService");
+    aiClassification = (await classifyWithOllama(text)) ?? undefined;
+    if (aiClassification === "PHISHING") {
+      flags.push({
+        type: "AI_PHISHING",
+        detail: "AI model (Llama3) classified this message as PHISHING",
+        score: 30,
+      });
+    }
+    if (aiClassification === "SUSPICIOUS") {
+      flags.push({
+        type: "AI_PHISHING",
+        detail: "AI model (Llama3) classified this message as SUSPICIOUS",
+        score: 10,
+      });
+    }
+  } catch (err) {
+    console.error("[Ollama] Classification failed:", err);
+    // Still returns result without AI classification
   }
-  if (aiClassification === "SUSPICIOUS") {
-    flags.push({
-      type: "AI_PHISHING",
-      detail: "AI model (Llama3) classified this message as SUSPICIOUS",
-      score: 10,
-    });
-  }
-} catch (err) {
-  console.error("[Ollama] Classification failed:", err);
-  // Still returns result without AI classification
-}
 
   // ── 7. Risk scoring ───────────────────────────────────────
   const { score, level } = calculateRiskScore({

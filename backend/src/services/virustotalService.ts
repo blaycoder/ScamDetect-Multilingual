@@ -14,22 +14,29 @@ export async function checkUrlVirusTotal(
   if (!apiKey) return null;
 
   try {
-    // Base64url-encode the URL (VirusTotal v3 requirement)
-    const encodedUrl = Buffer.from(url).toString("base64url");
-    const res = await axios.get(`${VT_API_URL}/urls/${encodedUrl}`, {
-      headers: { "x-apikey": apiKey },
-      timeout: 8000,
-    });
+    const encodedParams = new URLSearchParams();
+    // const encodedUrl = Buffer.from(url).toString("base64url");
+    encodedParams.set("url", url);
 
-    const stats = res.data?.data?.attributes?.last_analysis_stats;
-    if (!stats) return null;
-
-    return {
-      malicious: stats.malicious ?? 0,
-      suspicious: stats.suspicious ?? 0,
-      harmless: stats.harmless ?? 0,
-      undetected: stats.undetected ?? 0,
+    const options = {
+      method: "POST",
+      url: `${VT_API_URL}/urls`,
+      headers: {
+        "x-apikey": apiKey,
+        accept: "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      data: encodedParams,
     };
+
+    const res = await axios.request(options);
+    console.log("VirusTotal response:", res.data);
+
+    // const stats = res.data?.data?.attributes?.last_analysis_stats;
+    // if (!stats) return null;
+
+    return res.data;
+    ;
   } catch {
     return null;
   }
