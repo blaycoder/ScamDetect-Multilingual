@@ -1,0 +1,16 @@
+{
+  "name": "scamdetect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multilingual Scam & Phishing Detector",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build"
+  },
+  "dependencies": {
+    "lingo.dev": "^0.133.1"
+  }
+}

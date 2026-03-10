@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/* ── Cyberpunk Color Palette ──────────────────────────────────── */
+@theme inline {
+  --color-background: #0a0a0f;
+  --color-surface: #0f0f1a;
+  --color-surface-2: #141428;
+  --color-border: #1a1a3e;
+
+  --color-neon-cyan: #00f0ff;
+  --color-neon-magenta: #ff00ff;
+  --color-neon-blue: #7df9ff;
+  --color-neon-purple: #9d00ff;
+  --color-neon-green: #00ff9f;
+
+  --color-safe: #00ff9f;
+  --color-suspicious: #ffaa00;
+  --color-danger: #ff003c;
+
+  --color-text-primary: #e2e8ff;
+  --color-text-muted: #6b7280;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ── Base Reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0a0f;
+  color: #e2e8ff;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Cyberpunk grid background ─────────────────────────────────── */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Neon glow utilities ────────────────────────────────────────── */
+.glow-cyan {
+  box-shadow:
+    0 0 10px rgba(0, 240, 255, 0.4),
+    0 0 20px rgba(0, 240, 255, 0.2),
+    inset 0 0 10px rgba(0, 240, 255, 0.05);
+}
+
+.glow-magenta {
+  box-shadow:
+    0 0 10px rgba(255, 0, 255, 0.4),
+    0 0 20px rgba(255, 0, 255, 0.2),
+    inset 0 0 10px rgba(255, 0, 255, 0.05);
+}
+
+.glow-text-cyan {
+  text-shadow:
+    0 0 8px rgba(0, 240, 255, 0.8),
+    0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.glow-text-magenta {
+  text-shadow:
+    0 0 8px rgba(255, 0, 255, 0.8),
+    0 0 20px rgba(255, 0, 255, 0.4);
+}
+
+/* ── Glassmorphism panel ────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(15, 15, 26, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: 12px;
+}
+
+/* ── Scanning animation ─────────────────────────────────────────── */
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.4;
+  }
+}
+
+.scan-animation {
+  animation: scan-line 2s linear infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.6);
+}
