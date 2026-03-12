@@ -60,9 +60,7 @@ export async function runDetectionPipeline(
   if (extractedUrls.length > 0 && process.env.VIRUSTOTAL_API_KEY) {
     try {
       const { checkUrlVirusTotal } = await import("./virustotalService");
-      console.log("[VT] Checking URL:", extractedUrls[0]);
       virustotalResult = await checkUrlVirusTotal(extractedUrls[0]);
-      console.log("[VT] Result:", JSON.stringify(virustotalResult, null, 2));
       if (virustotalResult && virustotalResult.malicious > 0) {
         flags.push({
           type: "VIRUSTOTAL_MALICIOUS",

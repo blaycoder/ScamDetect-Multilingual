@@ -87,3 +87,60 @@ export async function saveCommunityReport(
 
   return data?.id ?? null;
 }
+
+// ── URL Scan Records ──────────────────────────────────────────
+
+/**
+ * Create a new url_scans row.
+ * vt_analysis_id is stored so results can be fetched later.
+ * @returns the new row UUID or null on failure.
+ */
+export async function saveUrlScan(
+  url: string,
+  vtAnalysisId: string | null,
+  userId?: string,
+): Promise<string | null> {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("url_scans")
+    .insert({
+      url: url.slice(0, 2048),
+      vt_analysis_id: vtAnalysisId ?? null,
+      status: vtAnalysisId ? "pending" : "failed",
+      user_id: userId ?? null,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[Supabase] saveUrlScan error:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
+}
+
+/**
+ * Update an existing url_scans row with the completed VT result.
+ */
+export async function updateUrlScanResult(
+  scanId: string,
+  vtResult: object,
+  status: "completed" | "failed",
+): Promise<void> {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("url_scans")
+    .update({
+      vt_result: vtResult,
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", scanId);
+
+  if (error) {
+    console.error("[Supabase] updateUrlScanResult error:", error.message);
+  }
+}

@@ -8,8 +8,9 @@ import {
   Globe,
   Cpu,
   Database,
+  ShieldAlert,
 } from "lucide-react";
-import type { DetectionResult, DetectionFlag } from "@/types";
+import type { DetectionResult, DetectionFlag, VTEngine } from "@/types";
 import { RiskBadge } from "./RiskBadge";
 
 interface ResultPanelProps {
@@ -24,6 +25,43 @@ const FLAG_ICONS: Record<string, React.ElementType> = {
   AI_PHISHING: Cpu,
   DOMAIN_IMPERSONATION: Globe,
 };
+
+const CATEGORY_COLORS: Record<string, string> = {
+  malicious:
+    "text-[#ff003c] border-[rgba(255,0,60,0.3)] bg-[rgba(255,0,60,0.06)]",
+  suspicious:
+    "text-[#ffaa00] border-[rgba(255,170,0,0.3)] bg-[rgba(255,170,0,0.06)]",
+  harmless:
+    "text-[#00ff9f] border-[rgba(0,255,159,0.3)] bg-[rgba(0,255,159,0.06)]",
+};
+
+function VTEngineTable({ engines }: { engines: VTEngine[] }) {
+  return (
+    <div>
+      <p className="mb-2 font-mono text-xs text-[#6b7280] tracking-widest">
+        FLAGGING ENGINES ({engines.length})
+      </p>
+      <div className="max-h-48 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+        {engines.map((e) => {
+          const colors =
+            CATEGORY_COLORS[e.category] ??
+            "text-[#6b7280] border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)]";
+          return (
+            <div
+              key={e.name}
+              className={`flex items-center justify-between rounded border px-3 py-1.5 ${colors}`}
+            >
+              <span className="font-mono text-xs truncate">{e.name}</span>
+              <span className="font-mono text-[10px] uppercase tracking-wide shrink-0 ml-2 opacity-80">
+                {e.result}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function FlagRow({ flag }: { flag: DetectionFlag }) {
   const Icon = FLAG_ICONS[flag.type] ?? AlertTriangle;
@@ -120,41 +158,57 @@ export function ResultPanel({ result }: ResultPanelProps) {
 
       {/* VirusTotal result */}
       {result.virustotalResult && (
-        <div className="grid grid-cols-4 gap-3 text-center">
-          {[
-            {
-              label: "MALICIOUS",
-              value: result.virustotalResult.malicious,
-              color: "text-[#ff003c]",
-            },
-            {
-              label: "SUSPICIOUS",
-              value: result.virustotalResult.suspicious,
-              color: "text-[#ffaa00]",
-            },
-            {
-              label: "HARMLESS",
-              value: result.virustotalResult.harmless,
-              color: "text-[#00ff9f]",
-            },
-            {
-              label: "UNDETECTED",
-              value: result.virustotalResult.undetected,
-              color: "text-[#6b7280]",
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-2"
-            >
-              <p className={`font-mono text-lg font-bold ${item.color}`}>
-                {item.value}
-              </p>
-              <p className="font-mono text-[10px] text-[#6b7280]">
-                {item.label}
-              </p>
-            </div>
-          ))}
+        <div className="space-y-3">
+          {/* Stats grid */}
+          <div className="grid grid-cols-4 gap-3 text-center">
+            {[
+              {
+                label: "MALICIOUS",
+                value: result.virustotalResult.malicious,
+                color: "text-[#ff003c]",
+              },
+              {
+                label: "PHISHING",
+                value: result.virustotalResult.phishingCount ?? 0,
+                color: "text-[#ff6600]",
+              },
+              {
+                label: "HARMLESS",
+                value: result.virustotalResult.harmless,
+                color: "text-[#00ff9f]",
+              },
+              {
+                label: "UNDETECTED",
+                value: result.virustotalResult.undetected,
+                color: "text-[#6b7280]",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-2"
+              >
+                <p className={`font-mono text-lg font-bold ${item.color}`}>
+                  {item.value}
+                </p>
+                <p className="font-mono text-[10px] text-[#6b7280]">
+                  {item.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Per-engine flagged results */}
+          {result.virustotalResult.engines &&
+            result.virustotalResult.engines.filter(
+              (e) => e.category === "malicious" || e.category === "suspicious",
+            ).length > 0 && (
+              <VTEngineTable
+                engines={result.virustotalResult.engines.filter(
+                  (e) =>
+                    e.category === "malicious" || e.category === "suspicious",
+                )}
+              />
+            )}
         </div>
       )}
 

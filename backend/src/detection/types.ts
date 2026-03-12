@@ -19,11 +19,25 @@ export interface DetectionFlag {
   score: number;
 }
 
+export interface VTEngine {
+  name: string;
+  category: string;
+  result: string;
+}
+
 export interface VirusTotalResult {
   malicious: number;
   suspicious: number;
   harmless: number;
   undetected: number;
+  /** Analysis ID returned by VT — used to link scan records in the DB. */
+  vtAnalysisId?: string;
+  /** Number of engines that specifically flagged the URL as phishing. */
+  phishingCount?: number;
+  /** VT analysis status: "queued" | "in-progress" | "completed". */
+  status?: string;
+  /** Per-engine results (non-undetected engines only). */
+  engines?: VTEngine[];
 }
 
 export interface DetectionResult {
