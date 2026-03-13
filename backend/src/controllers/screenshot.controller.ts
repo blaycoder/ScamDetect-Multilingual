@@ -23,7 +23,7 @@ export async function scanScreenshot(
     language?: string;
   };
   try {
-    const extractedText = await extractTextFromImage(imageBase64);
+    const { extractedText } = await extractTextFromImage(imageBase64);
     if (!extractedText) {
       res.status(422).json({ error: "Could not extract text from the image" });
       return;
@@ -31,7 +31,18 @@ export async function scanScreenshot(
     const result = await runDetectionPipeline(extractedText, language ?? "en");
     saveDetectionResult(extractedText, result, req.userId).catch(() => {});
     res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: "Screenshot scan failed" });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[scanScreenshot] failed", {
+      hasImage: Boolean(imageBase64),
+      imageLength: imageBase64?.length ?? 0,
+      language: language ?? "en",
+      message,
+      stack: err instanceof Error ? err.stack : undefined,
+    });
+    res.status(500).json({
+      error: "Screenshot scan failed",
+      details: message,
+    });
   }
 }

@@ -4,18 +4,19 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Link2 } from "lucide-react";
 import { api } from "@/lib/api";
-import type { DetectionResult, LanguageCode } from "@/types";
+import type { DetectionResult } from "@/types";
 import { ResultPanel } from "@/components/ui/ResultPanel";
 import { ScannerButton } from "@/components/ui/ScannerButton";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { LoginPrompt } from "@/components/ui/LoginPrompt";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ScanUrlPage() {
   const [url, setUrl] = useState("");
-  const [language, setLanguage] = useState<LanguageCode>("en");
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { language, setLanguage } = useLanguage();
 
   async function handleScan() {
     if (!url.trim()) return;

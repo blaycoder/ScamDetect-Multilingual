@@ -1,12 +1,15 @@
-import type { DetectionResult, ScamReport, CommunityReport } from "@/types";
+import type { DetectionResult, ScamReport } from "@/types";
 import { supabase } from "@/lib/supabaseClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || "API request failed");
+    const err = await res
+      .json()
+      .catch(() => ({ error: res.statusText, details: undefined }));
+    const message = [err.error, err.details].filter(Boolean).join(": ");
+    throw new Error(message || "API request failed");
   }
   return res.json() as Promise<T>;
 }
@@ -23,6 +26,23 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 export const api = {
+  /** POST /api/translate-ui */
+  translateUiTexts: async (
+    texts: string[],
+    targetLanguage: string,
+  ): Promise<string[]> => {
+    const result = await fetch(`${API_URL}/api/translate-ui`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify({ texts, targetLanguage }),
+    }).then(handleResponse<{ translations: string[] }>);
+
+    return result.translations;
+  },
+
   /** POST /api/analyze-message */
   analyzeMessage: async (
     message: string,

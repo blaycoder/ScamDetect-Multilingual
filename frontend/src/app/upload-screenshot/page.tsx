@@ -5,20 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Image as ImageIcon, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { stripDataUrl } from "@/lib/utils";
-import type { DetectionResult, LanguageCode } from "@/types";
+import type { DetectionResult } from "@/types";
 import { ResultPanel } from "@/components/ui/ResultPanel";
 import { ScannerButton } from "@/components/ui/ScannerButton";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { LoginPrompt } from "@/components/ui/LoginPrompt";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function UploadScreenshotPage() {
   const [preview, setPreview] = useState<string | null>(null);
-  const [language, setLanguage] = useState<LanguageCode>("en");
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { language, setLanguage } = useLanguage();
 
   function handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -74,8 +75,7 @@ export default function UploadScreenshotPage() {
             Upload <span className="text-[#7df9ff]">Screenshot</span>
           </h1>
           <p className="mt-2 text-sm text-[#6b7280]">
-            Upload a screenshot. Tesseract OCR will extract the text for
-            analysis.
+            Upload a screenshot. OCR will extract the text for analysis.
           </p>
         </motion.div>
 

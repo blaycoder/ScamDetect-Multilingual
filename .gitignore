@@ -45,3 +45,4 @@ tessdata/
 *.txt
 *.sql
 *.log
+*config

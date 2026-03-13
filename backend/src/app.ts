@@ -10,6 +10,7 @@ import screenshotRoutes from "./routes/screenshot.routes";
 import reportRoutes from "./routes/report.routes";
 import databaseRoutes from "./routes/database.routes";
 import userScansRoutes from "./routes/userScans.routes";
+import translationRoutes from "./routes/translation.routes";
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.use("/api", screenshotRoutes);
 app.use("/api", reportRoutes);
 app.use("/api", databaseRoutes);
 app.use("/api", userScansRoutes); // GET /api/user/scans — requires auth
+app.use("/api", translationRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req, res) => {

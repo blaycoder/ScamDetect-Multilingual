@@ -70,12 +70,14 @@ export interface CommunityReport {
 }
 
 export const SUPPORTED_LANGUAGES = [
-  { code: "en", label: "English" },
+  { code: "en-US", label: "English" },
   { code: "yo-NG", label: "Yoruba" },
-  { code: "ha", label: "Hausa" },
-  { code: "ig", label: "Igbo" },
-  { code: "fr", label: "French" },
-  { code: "es", label: "Spanish" },
+  { code: "ha-NG", label: "Hausa" },
+  { code: "ig-NG", label: "Igbo" },
+  { code: "fr-CA", label: "French" },
+  { code: "es-ES", label: "Spanish" },
+  { code: "ta-IN", label: "Tamil" },
+  { code: "en-PT", label: "Portugal" },
 ] as const;
 
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]["code"];

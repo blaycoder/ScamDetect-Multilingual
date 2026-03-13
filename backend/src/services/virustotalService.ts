@@ -104,8 +104,8 @@ export async function submitUrl(url: string): Promise<string | null> {
  */
 export async function getAnalysis(
   vtAnalysisId: string,
-  maxAttempts = 3,
-  delayMs = 2500,
+  maxAttempts = 6,
+  delayMs = 5000,
 ): Promise<VTDetailedResult | null> {
   const key = apiKey();
   if (!key) return null;
@@ -121,14 +121,20 @@ export async function getAnalysis(
       if (!attrs) return null;
 
       // Not completed yet — wait and retry if attempts remain
-      if (attrs.status !== "completed" && attempt < maxAttempts) {
-        console.log(
-          `[VT] Analysis ${vtAnalysisId} status: ${attrs.status} — retry ${attempt}/${maxAttempts}`,
-        );
-        await sleep(delayMs);
-        continue;
+      if (attrs.status !== "completed") {
+        if (attempt < maxAttempts) {
+          console.log(
+            `[VT] Analysis ${vtAnalysisId} status: ${attrs.status} — retry ${attempt}/${maxAttempts}`,
+          );
+          await sleep(delayMs);
+          continue;
+        } else {
+          console.log(
+            `[VT] Analysis ${vtAnalysisId} still ${attrs.status} after ${maxAttempts} attempts — returning null`,
+          );
+          return null;
+        }
       }
-
       // Build per-engine summary (only include flagged entries for brevity)
       const allEngines = Object.values(attrs.results ?? {});
       const engines = allEngines
@@ -173,10 +179,16 @@ export async function getAnalysis(
 export async function checkUrlVirusTotal(
   url: string,
 ): Promise<VirusTotalResult | null> {
+  console.log("[VT] Starting checkUrlVirusTotal for:", url);
+
   const vtAnalysisId = await submitUrl(url);
+  console.log("[VT] submitUrl returned:", vtAnalysisId);
+
   if (!vtAnalysisId) return null;
 
   const detailed = await getAnalysis(vtAnalysisId);
+  console.log("[VT] getAnalysis returned:", detailed ? "SUCCESS" : "NULL");
+
   if (!detailed) return null;
 
   return {

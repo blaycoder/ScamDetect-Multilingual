@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Shield, LogIn, LogOut, User } from "lucide-react";
+import { Globe2, Shield, LogIn, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { SUPPORTED_LANGUAGES, type LanguageCode } from "@/types";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -19,6 +21,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
+  const { language, setLanguage } = useLanguage();
 
   async function handleSignOut() {
     await signOut();
@@ -58,8 +61,28 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Auth controls */}
+        {/* Language + Auth controls */}
         <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded border border-[rgba(0,240,255,0.25)] px-2 py-1">
+            <Globe2 className="h-3.5 w-3.5 text-[#00f0ff]" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as LanguageCode)}
+              aria-label="Select language"
+              className="bg-transparent font-mono text-xs text-[#00f0ff] outline-none"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option
+                  key={lang.code}
+                  value={lang.code}
+                  className="bg-[#0f0f1a] text-[#e2e8ff]"
+                >
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {!loading &&
             (user ? (
               <div className="flex items-center gap-2">
