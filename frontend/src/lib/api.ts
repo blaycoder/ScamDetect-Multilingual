@@ -69,18 +69,37 @@ export const api = {
     }).then(handleResponse<DetectionResult>),
 
   /** POST /api/scan-screenshot */
+  ocrImage: async (
+    imageBase64: string,
+    language = "en",
+  ): Promise<DetectionResult> => {
+    const headers = {
+      "Content-Type": "application/json",
+      ...(await authHeaders()),
+    };
+
+    const ocrRes = await fetch(`${API_URL}/api/ocr`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ imageBase64, language }),
+    });
+
+    if (ocrRes.status === 404) {
+      return fetch(`${API_URL}/api/scan-screenshot`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ imageBase64, language }),
+      }).then(handleResponse<DetectionResult>);
+    }
+
+    return handleResponse<DetectionResult>(ocrRes);
+  },
+
+  /** POST /api/scan-screenshot */
   scanScreenshot: async (
     imageBase64: string,
     language = "en",
-  ): Promise<DetectionResult> =>
-    fetch(`${API_URL}/api/scan-screenshot`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(await authHeaders()),
-      },
-      body: JSON.stringify({ imageBase64, language }),
-    }).then(handleResponse<DetectionResult>),
+  ): Promise<DetectionResult> => api.ocrImage(imageBase64, language),
 
   /** POST /api/report-scam */
   reportScam: async (
