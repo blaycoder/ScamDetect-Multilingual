@@ -7,7 +7,7 @@ const ollama = new Ollama({
   host: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
 });
 
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
+const MODEL = process.env.OLLAMA_MODEL || "gpt-oss:120b-cloud";
 
 const SYSTEM_PROMPT = `You are a cybersecurity expert specializing in phishing and scam detection.
 Analyze the following message and classify it as exactly one of these three categories:
@@ -39,6 +39,7 @@ export async function classifyWithOllama(
     });
 
     const raw = response.message?.content?.trim().toUpperCase();
+    console.log("Response from Ollama:", response);
     if (raw === "SAFE" || raw === "SUSPICIOUS" || raw === "PHISHING") {
       return raw as AIClassification;
     }

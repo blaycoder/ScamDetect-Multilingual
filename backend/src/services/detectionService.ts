@@ -97,14 +97,14 @@ export async function runDetectionPipeline(
     if (aiClassification === "PHISHING") {
       flags.push({
         type: "AI_PHISHING",
-        detail: "AI model (Llama3) classified this message as PHISHING",
+        detail: "AI model classified this message as PHISHING",
         score: 30,
       });
     }
     if (aiClassification === "SUSPICIOUS") {
       flags.push({
         type: "AI_PHISHING",
-        detail: "AI model (Llama3) classified this message as SUSPICIOUS",
+        detail: "AI model classified this message as SUSPICIOUS",
         score: 10,
       });
     }
