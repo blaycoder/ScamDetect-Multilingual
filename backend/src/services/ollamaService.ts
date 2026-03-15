@@ -39,7 +39,6 @@ export async function classifyWithOllama(
     });
 
     const raw = response.message?.content?.trim().toUpperCase();
-    console.log("Response from Ollama:", response);
     if (raw === "SAFE" || raw === "SUSPICIOUS" || raw === "PHISHING") {
       return raw as AIClassification;
     }
