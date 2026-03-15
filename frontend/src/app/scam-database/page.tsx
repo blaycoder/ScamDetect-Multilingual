@@ -10,7 +10,7 @@ export default function ScamDatabasePage() {
         </p>
         {/* Table — implemented in Step 7 */}
         <div className="glass-panel p-8 text-center text-[#6b7280] font-mono text-sm">
-          ◈ Scam database table coming in Step 7
+          Scam database table is coming soon
         </div>
       </div>
     </div>
