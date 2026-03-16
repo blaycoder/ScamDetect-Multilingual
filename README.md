@@ -10,7 +10,7 @@
 | Backend      | Node.js, Express.js, TypeScript                                     |
 | Database     | Supabase                                                            |
 | AI           | Ollama (gpt-oss:120b-cloud )                                        |
-| OCR          | Microsoft Azure OCR                                                 |
+| OCR          | Google Vision OCR                                                 |
 | Threat Intel | VirusTotal API, PhishTank                                           |
 | Translation  | Lingo.dev                                                           |
 | Hosting      | Vercel (frontend) + Render (backend) + Supabase                     |
@@ -81,7 +81,7 @@ Run the SQL in `backend/supabase-schema.sql` in your Supabase SQL Editor.
 ```
 User Input (message / URL / screenshot)
     ↓
-[OCR] Extract text from image (Microsoft Azure OCR)
+[OCR] Extract text from image (Google Vision OCR)
     ↓
 [Keywords] Phishing keyword scan
     ↓
@@ -103,6 +103,14 @@ User Input (message / URL / screenshot)
     ↓
 Return JSON to frontend
 ```
+
+## Flowchart
+
+![ScamDetect Flowchart](./frontend/flowchart.png)
+
+
+---
+
 
 ## Risk Scoring
 
