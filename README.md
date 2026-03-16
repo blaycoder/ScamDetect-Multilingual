@@ -150,6 +150,6 @@ Return JSON to frontend
 
 ---
 
-## Languages Supported
-
-English · Yoruba · Hausa · Igbo · French · Spanish
+## Future Enhancements
+- Real-time URL scanning browser extension
+- Detailed explanations of detection results for user education
