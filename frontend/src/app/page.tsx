@@ -19,7 +19,7 @@ export default function Home() {
 
         <p className="max-w-xl text-[#6b7280] text-lg mb-12 leading-relaxed">
           AI-powered phishing & scam detection for SMS, email, WhatsApp messages
-          and URLs. Supports 6 languages with real-time threat intelligence.
+          and URLs. Supports several languages with real-time threat intelligence.
         </p>
 
         {/* CTA Buttons */}

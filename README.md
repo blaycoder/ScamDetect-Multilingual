@@ -1,6 +1,6 @@
 # ScamDetect — Multilingual Scam & Phishing Detector
 
-> AI-powered cybersecurity tool to detect phishing, scams, and malicious URLs across 6 languages.
+> AI-powered cybersecurity tool to detect phishing, scams, and malicious URLs across several languages.
 
 ## Tech Stack
 
