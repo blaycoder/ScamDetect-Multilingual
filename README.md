@@ -106,7 +106,7 @@ Return JSON to frontend
 
 ## Flowchart
 
-![ScamDetect Flowchart](./frontend/flowchart.png)
+![ScamDetect Flowchart](./frontend/public/flowchart.png)
 
 
 ---
