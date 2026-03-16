@@ -8,9 +8,9 @@
 | ------------ | ------------------------------------------------------------------- |
 | Frontend     | Next.js 14 (App Router), TypeScript, Tailwind CSS v4, Framer Motion |
 | Backend      | Node.js, Express.js, TypeScript                                     |
-| Database     | Supabase (PostgreSQL)                                               |
-| AI           | Ollama (Llama3 local LLM)                                           |
-| OCR          | Tesseract.js                                                        |
+| Database     | Supabase                                                            |
+| AI           | Ollama (gpt-oss:120b-cloud )                                        |
+| OCR          | Microsoft Azure OCR                                                 |
 | Threat Intel | VirusTotal API, PhishTank                                           |
 | Translation  | Lingo.dev                                                           |
 | Hosting      | Vercel (frontend) + Render (backend) + Supabase                     |
@@ -45,7 +45,7 @@ ScamDetect/
 ### Prerequisites
 
 - Node.js 20+
-- Ollama installed locally (`ollama pull llama3`)
+- Ollama installed locally
 - Supabase project
 - VirusTotal API key (free tier)
 - Lingo.dev API key (for translation)
@@ -81,7 +81,7 @@ Run the SQL in `backend/supabase-schema.sql` in your Supabase SQL Editor.
 ```
 User Input (message / URL / screenshot)
     ↓
-[OCR] Extract text from image (Tesseract.js)
+[OCR] Extract text from image (Microsoft Azure OCR)
     ↓
 [Keywords] Phishing keyword scan
     ↓
@@ -93,7 +93,7 @@ User Input (message / URL / screenshot)
     ↓
 [PhishTank] Dataset lookup
     ↓
-[Ollama] Llama3 classification (SAFE/SUSPICIOUS/PHISHING)
+[Ollama] gpt-oss:120b-cloud classification (SAFE/SUSPICIOUS/PHISHING)
     ↓
 [Scoring] 0-100 risk score →  SAFE / SUSPICIOUS / HIGH RISK
     ↓
