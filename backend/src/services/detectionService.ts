@@ -90,26 +90,42 @@ export async function runDetectionPipeline(
     }
   }
 
-  // ── 6. Ollama AI classification ───────────────────────────
+  // ── 6. AI classification (multi-level: Ollama + Groq) ──────
+  // Both models run in parallel and each failure is isolated, so one
+  // provider being down never blocks the other. The verdicts are
+  // collapsed into the most-severe classification (PHISHING wins).
   try {
-    const { classifyWithOllama } = await import("./ollamaService");
-    aiClassification = (await classifyWithOllama(text)) ?? undefined;
+    const [{ classifyWithOllama }, { classifyWithGroq }] = await Promise.all([
+      import("./ollamaService"),
+      import("./groqService"),
+    ]);
+
+    const [ollamaVerdict, groqVerdict] = await Promise.all([
+      classifyWithOllama(text).catch(() => null),
+      classifyWithGroq(text).catch((err) => {
+        console.error("[Groq] Error:", err);
+        return null;
+      }),
+    ]);
+
+    aiClassification = mostSevere(ollamaVerdict, groqVerdict) ?? undefined;
+
+    const detail = `(Ollama: ${ollamaVerdict ?? "n/a"}, Groq: ${groqVerdict ?? "n/a"})`;
     if (aiClassification === "PHISHING") {
       flags.push({
         type: "AI_PHISHING",
-        detail: "AI model classified this message as PHISHING",
+        detail: `AI models classified this message as PHISHING ${detail}`,
         score: 30,
       });
-    }
-    if (aiClassification === "SUSPICIOUS") {
+    } else if (aiClassification === "SUSPICIOUS") {
       flags.push({
         type: "AI_PHISHING",
-        detail: "AI model classified this message as SUSPICIOUS",
+        detail: `AI models classified this message as SUSPICIOUS ${detail}`,
         score: 10,
       });
     }
   } catch (err) {
-    console.error("[Ollama] Classification failed:", err);
+    console.error("[AI] Classification failed:", err);
     // Still returns result without AI classification
   }
 
@@ -149,4 +165,22 @@ export async function runDetectionPipeline(
 
 function buildSummary(score: number, level: string, flagCount: number): string {
   return `This message has been classified as ${level} with a risk score of ${score}/100. ${flagCount} threat indicator${flagCount !== 1 ? "s" : ""} were detected.`;
+}
+
+// Severity ranking used to merge multiple AI verdicts: the most
+// cautious (highest-severity) non-null classification wins.
+const AI_SEVERITY: Record<AIClassification, number> = {
+  SAFE: 0,
+  SUSPICIOUS: 1,
+  PHISHING: 2,
+};
+
+function mostSevere(
+  ...verdicts: (AIClassification | null)[]
+): AIClassification | null {
+  const present = verdicts.filter(
+    (v): v is AIClassification => v !== null,
+  );
+  if (present.length === 0) return null;
+  return present.reduce((a, b) => (AI_SEVERITY[b] > AI_SEVERITY[a] ? b : a));
 }

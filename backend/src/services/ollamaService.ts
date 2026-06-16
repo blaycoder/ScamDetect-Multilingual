@@ -4,7 +4,10 @@ import type { AIClassification } from "../detection/types";
 // ── Ollama AI Classification Service ─────────────────────────
 
 const ollama = new Ollama({
-  host: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+  host: process.env.OLLAMA_BASE_URL,
+  headers:{
+    "Authorization": `Bearer ${process.env.OLLAMA_API_KEY}`
+  }
 });
 
 const MODEL = process.env.OLLAMA_MODEL || "gpt-oss:120b-cloud";

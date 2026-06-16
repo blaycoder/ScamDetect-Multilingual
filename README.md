@@ -9,7 +9,7 @@
 | Frontend     | Next.js 14 (App Router), TypeScript, Tailwind CSS v4, Framer Motion |
 | Backend      | Node.js, Express.js, TypeScript                                     |
 | Database     | Supabase                                                            |
-| AI           | Ollama (gpt-oss:120b-cloud )                                        |
+| AI           | Multi-level: Ollama (gpt-oss:120b) + Groq (llama-3.1-8b-instant)    |
 | OCR          | Google Vision OCR                                                 |
 | Threat Intel | VirusTotal API, PhishTank                                           |
 | Translation  | Lingo.dev                                                           |
@@ -93,7 +93,8 @@ User Input (message / URL / screenshot)
     ↓
 [PhishTank] Dataset lookup
     ↓
-[Ollama] gpt-oss:120b-cloud classification (SAFE/SUSPICIOUS/PHISHING)
+[AI] Multi-level verification — Ollama + Groq run in parallel,
+     most-severe verdict wins (SAFE/SUSPICIOUS/PHISHING)
     ↓
 [Scoring] 0-100 risk score →  SAFE / SUSPICIOUS / HIGH RISK
     ↓
