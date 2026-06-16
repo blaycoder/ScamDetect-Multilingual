@@ -23,7 +23,7 @@ export async function scanScreenshot(
     language?: string;
   };
   try {
-    const { extractedText } = await extractTextFromImage(imageBase64);
+    const { extractedText } = await extractTextFromImage(imageBase64, language);
     if (!extractedText) {
       res.status(422).json({ error: "Could not extract text from the image" });
       return;
