@@ -16,12 +16,23 @@ const app = express();
 
 // ── Security middleware ───────────────────────────────────────
 app.use(helmet());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://scam-detect-multilingual.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000" || "https://scam-detect-multilingual.vercel.app",
-    methods: ["GET", "POST"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 // ── Rate limiting (100 req / 15 min per IP) ───────────────────
