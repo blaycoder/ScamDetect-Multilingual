@@ -93,6 +93,13 @@ export function ResultPanel({ result }: ResultPanelProps) {
       transition={{ duration: 0.4 }}
       className="glass-panel p-6 space-y-6"
     >
+      <p
+        data-no-translate
+        className="text-xs text-[#6b7280] leading-relaxed"
+      >
+        ⚠️ Accuracy not guaranteed — always verify independently before acting.
+      </p>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <RiskBadge level={result.riskLevel} score={result.riskScore} />

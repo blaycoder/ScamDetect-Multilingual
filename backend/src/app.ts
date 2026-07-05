@@ -11,8 +11,11 @@ import reportRoutes from "./routes/report.routes";
 import databaseRoutes from "./routes/database.routes";
 import userScansRoutes from "./routes/userScans.routes";
 import translationRoutes from "./routes/translation.routes";
+import disclaimerRoutes from "./routes/disclaimer.routes";
 
 const app = express();
+
+app.set("trust proxy", 1);
 
 // ── Security middleware ───────────────────────────────────────
 app.use(helmet());
@@ -32,7 +35,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -65,6 +68,7 @@ app.use("/api", reportRoutes);
 app.use("/api", databaseRoutes);
 app.use("/api", userScansRoutes); // GET /api/user/scans — requires auth
 app.use("/api", translationRoutes);
+app.use("/api", disclaimerRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req, res) => {

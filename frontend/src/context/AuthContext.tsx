@@ -9,6 +9,8 @@ import {
 } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
+import { api } from "@/lib/api";
+import { getAnonId } from "@/lib/onboarding";
 
 interface AuthContextType {
   user: User | null;
@@ -41,9 +43,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Keep state in sync with auth events (login, logout, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+
+      if (event === "SIGNED_IN" && session?.user) {
+        const anonId = getAnonId();
+        if (anonId) {
+          api.mergeDisclaimerAcknowledgment(anonId).catch((err) => {
+            console.error("[auth] disclaimer merge failed", err);
+          });
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
