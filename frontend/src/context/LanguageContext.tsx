@@ -12,9 +12,16 @@ import {
 } from "react";
 import { api } from "@/lib/api";
 import type { LanguageCode } from "@/types";
-import { LanguageSelectorModal } from "@/components/LanguageSelectorModal";
+import { LanguageDisclaimerModal } from "@/components/LanguageDisclaimerModal";
+import {
+  ensureAnonId,
+  getStoredLanguage,
+  hasAcknowledgedDisclaimer,
+  hasStoredLanguage,
+  PREFERRED_LANGUAGE_KEY,
+} from "@/lib/onboarding";
 
-const STORAGE_KEY = "preferred_language";
+const STORAGE_KEY = PREFERRED_LANGUAGE_KEY;
 
 interface LanguageContextType {
   language: LanguageCode;
@@ -89,6 +96,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [initialStep, setInitialStep] = useState<1 | 2>(1);
 
   // Refs so async callbacks always read the latest values without stale closures.
   const observerRef = useRef<MutationObserver | null>(null);
@@ -183,15 +191,31 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  // ── Bootstrap: read localStorage ─────────────────────────
+  // ── Bootstrap: anonId + disclaimer + language ─────────────
   useEffect(() => {
+    ensureAnonId();
     const stored = localStorage.getItem(STORAGE_KEY);
+
     queueMicrotask(() => {
-      if (isSupportedLanguage(stored)) {
+      if (hasAcknowledgedDisclaimer()) {
+        if (isSupportedLanguage(stored)) {
+          setLanguageState(stored);
+          languageRef.current = stored;
+        } else {
+          const fromOnboarding = getStoredLanguage();
+          if (isSupportedLanguage(fromOnboarding)) {
+            setLanguageState(fromOnboarding);
+            languageRef.current = fromOnboarding;
+          }
+        }
+        setShowModal(false);
+      } else if (hasStoredLanguage() && isSupportedLanguage(stored)) {
         setLanguageState(stored);
         languageRef.current = stored;
-        setShowModal(false);
+        setInitialStep(2);
+        setShowModal(true);
       } else {
+        setInitialStep(1);
         setShowModal(true);
       }
       setInitialized(true);
@@ -233,7 +257,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, nextLanguage);
   }, []);
 
-  const confirmFromModal = useCallback(
+  const completeOnboarding = useCallback(
     (nextLanguage: LanguageCode) => {
       setLanguage(nextLanguage);
       setShowModal(false);
@@ -269,11 +293,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       {/* Dim overlay while reading localStorage on first load */}
       {!initialized && <div className="fixed inset-0 z-[95] bg-black/60" />}
 
-      {/* Language picker — only shown on first visit */}
-      <LanguageSelectorModal
+      {/* Onboarding — language + disclaimer on first visit */}
+      <LanguageDisclaimerModal
         open={initialized && showModal}
+        initialStep={initialStep}
         defaultLanguage={language}
-        onConfirm={confirmFromModal}
+        onComplete={completeOnboarding}
       />
     </LanguageContext.Provider>
   );

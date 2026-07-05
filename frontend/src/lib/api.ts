@@ -3,6 +3,33 @@ import { supabase } from "@/lib/supabaseClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+interface ApiEnvelope<T> {
+  status: string;
+  data: T;
+}
+
+async function handleEnvelopeResponse<T>(res: Response): Promise<T> {
+  const body = (await res.json().catch(() => ({}))) as ApiEnvelope<T> & {
+    error?: string;
+    message?: string;
+  };
+
+  if (!res.ok) {
+    const message =
+      (body.data as { message?: string } | undefined)?.message ??
+      body.error ??
+      body.message ??
+      res.statusText;
+    throw new Error(message || "API request failed");
+  }
+
+  if (body.status !== "ok") {
+    throw new Error("API request failed");
+  }
+
+  return body.data;
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const err = await res
@@ -124,4 +151,32 @@ export const api = {
     fetch(`${API_URL}/api/user/scans`, {
       headers: { ...(await authHeaders()) },
     }).then(handleResponse<ScamReport[]>),
+
+  /** POST /api/disclaimer/acknowledge */
+  acknowledgeDisclaimer: async (body: {
+    anonId: string;
+    language: string;
+    disclaimerVersion: string;
+  }): Promise<{ id: string }> =>
+    fetch(`${API_URL}/api/disclaimer/acknowledge`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify(body),
+    }).then(handleEnvelopeResponse<{ id: string }>),
+
+  /** PATCH /api/disclaimer/acknowledge/merge */
+  mergeDisclaimerAcknowledgment: async (
+    anonId: string,
+  ): Promise<{ merged: boolean }> =>
+    fetch(`${API_URL}/api/disclaimer/acknowledge/merge`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify({ anonId }),
+    }).then(handleEnvelopeResponse<{ merged: boolean }>),
 };
