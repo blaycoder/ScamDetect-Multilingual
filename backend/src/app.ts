@@ -20,6 +20,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://scam-detect-multilingual.vercel.app",
 "https://www.scamdetect.run",
+"https://scamdetect.run",
 ];
 
 app.use(
