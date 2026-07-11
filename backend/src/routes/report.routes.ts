@@ -6,7 +6,7 @@ import {
 
 const router = Router();
 
-// POST /api/report-scam
+// DEPRECATED: use POST /api/reports (community_scam_reports). Kept for backward compatibility.
 router.post("/report-scam", reportScamValidators, reportScam);
 
 export default router;

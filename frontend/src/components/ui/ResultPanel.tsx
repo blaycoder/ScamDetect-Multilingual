@@ -9,12 +9,14 @@ import {
   Cpu,
   Database,
   ShieldAlert,
+  Users,
 } from "lucide-react";
-import type { DetectionResult, DetectionFlag, VTEngine } from "@/types";
+import type { DetectionResult, DetectionFlag, VTEngine, CommunitySignal } from "@/types";
 import { RiskBadge } from "./RiskBadge";
 
 interface ResultPanelProps {
   result: DetectionResult;
+  communitySignal?: CommunitySignal;
 }
 
 const FLAG_ICONS: Record<string, React.ElementType> = {
@@ -85,7 +87,9 @@ function FlagRow({ flag }: { flag: DetectionFlag }) {
   );
 }
 
-export function ResultPanel({ result }: ResultPanelProps) {
+export function ResultPanel({ result, communitySignal }: ResultPanelProps) {
+  const signal = communitySignal ?? result.communitySignal;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -109,6 +113,27 @@ export function ResultPanel({ result }: ResultPanelProps) {
           </span>
         )}
       </div>
+
+      {signal && signal.reportCount > 0 && (
+        <div
+          className="flex items-start gap-3 rounded border border-[rgba(255,170,0,0.45)] bg-[rgba(255,170,0,0.08)] px-4 py-3"
+          data-no-translate
+        >
+          <Users className="mt-0.5 h-4 w-4 shrink-0 text-[#ffaa00]" />
+          <div>
+            <p className="font-mono text-xs tracking-widest text-[#ffaa00]">
+              COMMUNITY
+            </p>
+            <p className="mt-0.5 text-sm text-[#e2e8ff]">
+              ⚠️ Flagged by {signal.reportCount} community report
+              {signal.reportCount !== 1 ? "s" : ""}
+              {signal.reportTypes.length > 0
+                ? ` (${signal.reportTypes.join(", ")})`
+                : ""}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Risk Score Bar */}
       <div>

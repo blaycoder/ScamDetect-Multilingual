@@ -1,4 +1,12 @@
-import type { DetectionResult, ScamReport } from "@/types";
+import type {
+  AdminCommunityReport,
+  CommunityReportStatus,
+  CommunityReportType,
+  CommunitySignal,
+  DetectionResult,
+  PublicCommunityReport,
+  ScamReport,
+} from "@/types";
 import { supabase } from "@/lib/supabaseClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -128,7 +136,7 @@ export const api = {
     language = "en",
   ): Promise<DetectionResult> => api.ocrImage(imageBase64, language),
 
-  /** POST /api/report-scam */
+  /** POST /api/report-scam — DEPRECATED: use createCommunityReport */
   reportScam: async (
     message: string,
     screenshotUrl?: string,
@@ -141,6 +149,167 @@ export const api = {
       },
       body: JSON.stringify({ message, screenshotUrl }),
     }).then(handleResponse<{ id: string }>),
+
+  /** POST /api/reports */
+  createCommunityReport: async (body: {
+    reportType: CommunityReportType;
+    reportedValue: string;
+    messageContent?: string;
+    screenshotBase64?: string;
+    description: string;
+    language: string;
+    anonId: string;
+  }): Promise<{ id: string }> =>
+    fetch(`${API_URL}/api/reports`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify(body),
+    }).then(handleEnvelopeResponse<{ id: string }>),
+
+  /** GET /api/reports/check?value= */
+  checkCommunityReports: async (value: string): Promise<CommunitySignal> =>
+    fetch(
+      `${API_URL}/api/reports/check?value=${encodeURIComponent(value)}`,
+    ).then(handleEnvelopeResponse<CommunitySignal>),
+
+  /** GET /api/reports/public */
+  listPublicCommunityReports: async (
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    items: PublicCommunityReport[];
+    page: number;
+    limit: number;
+  }> => {
+    const data = await fetch(
+      `${API_URL}/api/reports/public?page=${page}&limit=${limit}`,
+    ).then(
+      handleEnvelopeResponse<{
+        items: Array<{
+          id: string;
+          reported_value: string;
+          report_type: CommunityReportType;
+          created_at: string;
+        }>;
+        page: number;
+        limit: number;
+      }>,
+    );
+    return {
+      page: data.page,
+      limit: data.limit,
+      items: data.items.map((item) => ({
+        id: item.id,
+        reportedValue: item.reported_value,
+        reportType: item.report_type,
+        createdAt: item.created_at,
+      })),
+    };
+  },
+
+  /** GET /api/admin/reports */
+  listAdminReports: async (
+    status: CommunityReportStatus = "pending",
+    page = 1,
+    limit = 20,
+  ): Promise<{ items: AdminCommunityReport[]; page: number; limit: number }> => {
+    const data = await fetch(
+      `${API_URL}/api/admin/reports?status=${status}&page=${page}&limit=${limit}`,
+      { headers: { ...(await authHeaders()) } },
+    ).then(
+      handleEnvelopeResponse<{
+        items: Array<{
+          id: string;
+          reporter_user_id: string | null;
+          reporter_anon_id: string | null;
+          report_type: CommunityReportType;
+          reported_value: string;
+          message_content: string | null;
+          screenshot_url: string | null;
+          description: string;
+          language: string;
+          status: CommunityReportStatus;
+          moderator_id: string | null;
+          moderator_notes: string | null;
+          created_at: string;
+          reviewed_at: string | null;
+        }>;
+        page: number;
+        limit: number;
+      }>,
+    );
+    return {
+      page: data.page,
+      limit: data.limit,
+      items: data.items.map((item) => ({
+        id: item.id,
+        reporterUserId: item.reporter_user_id,
+        reporterAnonId: item.reporter_anon_id,
+        reportType: item.report_type,
+        reportedValue: item.reported_value,
+        messageContent: item.message_content,
+        screenshotUrl: item.screenshot_url,
+        description: item.description,
+        language: item.language,
+        status: item.status,
+        moderatorId: item.moderator_id,
+        moderatorNotes: item.moderator_notes,
+        createdAt: item.created_at,
+        reviewedAt: item.reviewed_at,
+      })),
+    };
+  },
+
+  /** PATCH /api/admin/reports/:id */
+  moderateCommunityReport: async (
+    id: string,
+    body: { status: "approved" | "rejected"; moderatorNotes?: string },
+  ): Promise<AdminCommunityReport> => {
+    const item = await fetch(`${API_URL}/api/admin/reports/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify(body),
+    }).then(
+      handleEnvelopeResponse<{
+        id: string;
+        reporter_user_id: string | null;
+        reporter_anon_id: string | null;
+        report_type: CommunityReportType;
+        reported_value: string;
+        message_content: string | null;
+        screenshot_url: string | null;
+        description: string;
+        language: string;
+        status: CommunityReportStatus;
+        moderator_id: string | null;
+        moderator_notes: string | null;
+        created_at: string;
+        reviewed_at: string | null;
+      }>,
+    );
+    return {
+      id: item.id,
+      reporterUserId: item.reporter_user_id,
+      reporterAnonId: item.reporter_anon_id,
+      reportType: item.report_type,
+      reportedValue: item.reported_value,
+      messageContent: item.message_content,
+      screenshotUrl: item.screenshot_url,
+      description: item.description,
+      language: item.language,
+      status: item.status,
+      moderatorId: item.moderator_id,
+      moderatorNotes: item.moderator_notes,
+      createdAt: item.created_at,
+      reviewedAt: item.reviewed_at,
+    };
+  },
 
   /** GET /api/scam-database */
   getScamDatabase: (): Promise<ScamReport[]> =>

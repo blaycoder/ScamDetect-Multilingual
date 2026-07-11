@@ -11,6 +11,7 @@ import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { LoginPrompt } from "@/components/ui/LoginPrompt";
 import { ImageCropper } from "@/components/ImageCropper";
 import { useLanguage } from "@/context/LanguageContext";
+import { attachCommunitySignal } from "@/lib/communityReports";
 
 export default function UploadScreenshotPage() {
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export default function UploadScreenshotPage() {
     try {
       const base64 = stripDataUrl(await fileToDataUrl(file));
       const data = await api.ocrImage(base64, language);
-      setResult(data);
+      setResult(await attachCommunitySignal(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Scan failed");
     } finally {

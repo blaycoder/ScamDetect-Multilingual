@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/analyze-message", label: "Analyze" },
   { href: "/scan-url", label: "Scan URL" },
   { href: "/upload-screenshot", label: "Screenshot" },
+  { href: "/report-scam", label: "Report" },
   { href: "/scam-database", label: "Database" },
   { href: "/dashboard", label: "Dashboard" },
 ];
