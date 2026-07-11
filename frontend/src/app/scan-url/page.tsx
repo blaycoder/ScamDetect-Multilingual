@@ -10,6 +10,7 @@ import { ScannerButton } from "@/components/ui/ScannerButton";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { LoginPrompt } from "@/components/ui/LoginPrompt";
 import { useLanguage } from "@/context/LanguageContext";
+import { attachCommunitySignal } from "@/lib/communityReports";
 
 export default function ScanUrlPage() {
   const [url, setUrl] = useState("");
@@ -25,7 +26,7 @@ export default function ScanUrlPage() {
     setResult(null);
     try {
       const data = await api.checkUrl(url, language);
-      setResult(data);
+      setResult(await attachCommunitySignal(data, [url.trim()]));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Scan failed");
     } finally {

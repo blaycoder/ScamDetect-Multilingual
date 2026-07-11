@@ -51,6 +51,74 @@ export interface DetectionResult {
   phishtankMatch?: boolean;
   translatedSummary?: string;
   language?: string;
+  /** Aggregate of approved community reports matching scanned values. */
+  communitySignal?: CommunitySignal;
+}
+
+export interface CommunitySignal {
+  reportCount: number;
+  reportTypes: string[];
+}
+
+export type CommunityReportType =
+  | "phone"
+  | "url"
+  | "business_name"
+  | "message";
+
+export type CommunityReportStatus = "pending" | "approved" | "rejected";
+
+export interface PublicCommunityReport {
+  id: string;
+  reportedValue: string;
+  reportType: CommunityReportType;
+  createdAt: string;
+}
+
+export interface AdminCommunityReport {
+  id: string;
+  reporterUserId: string | null;
+  reporterAnonId: string | null;
+  reporterLabel?: string;
+  reportType: CommunityReportType;
+  reportedValue: string;
+  messageContent: string | null;
+  screenshotUrl: string | null;
+  description: string;
+  language: string;
+  status: CommunityReportStatus;
+  moderatorId: string | null;
+  moderatorNotes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export type AdminRole = "moderator" | "superadmin";
+
+export interface AdminStats {
+  totalScans: number;
+  urlScans: number;
+  scansBySource: {
+    detectionLogs: number;
+    urlScans: number;
+  };
+  reportsByStatus: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+  reportsLast7Days: number;
+  topReportedValues: Array<{ reportedValue: string; count: number }>;
+}
+
+export interface AdminUser {
+  id: string;
+  userId: string;
+  role: AdminRole;
+  addedBy: string | null;
+  createdAt: string;
+  email: string | null;
+  addedByEmail: string | null;
 }
 
 export interface ScamReport {

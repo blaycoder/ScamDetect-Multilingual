@@ -12,6 +12,8 @@ import databaseRoutes from "./routes/database.routes";
 import userScansRoutes from "./routes/userScans.routes";
 import translationRoutes from "./routes/translation.routes";
 import disclaimerRoutes from "./routes/disclaimer.routes";
+import communityReportRoutes from "./routes/communityReport.routes";
+import adminRoutes from "./routes/admin.routes";
 
 const app = express();
 
@@ -35,7 +37,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -64,11 +66,13 @@ app.get("/health", (_req, res) => {
 app.use("/api", analyzeRoutes);
 app.use("/api", urlRoutes);
 app.use("/api", screenshotRoutes);
-app.use("/api", reportRoutes);
+app.use("/api", reportRoutes); // DEPRECATED: use POST /api/reports
 app.use("/api", databaseRoutes);
 app.use("/api", userScansRoutes); // GET /api/user/scans — requires auth
 app.use("/api", translationRoutes);
 app.use("/api", disclaimerRoutes);
+app.use("/api", communityReportRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req, res) => {

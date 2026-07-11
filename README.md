@@ -162,3 +162,4 @@ Return JSON to frontend
 ## Future Enhancements
 - Real-time URL scanning browser extension
 - Detailed explanations of detection results for user education
+- Finer scan-type breakdown (message vs screenshot) once a type column exists

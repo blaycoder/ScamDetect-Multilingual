@@ -10,6 +10,7 @@ import { ScannerButton } from "@/components/ui/ScannerButton";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { LoginPrompt } from "@/components/ui/LoginPrompt";
 import { useLanguage } from "@/context/LanguageContext";
+import { attachCommunitySignal } from "@/lib/communityReports";
 
 export default function AnalyzeMessagePage() {
   const [message, setMessage] = useState("");
@@ -25,7 +26,7 @@ export default function AnalyzeMessagePage() {
     setResult(null);
     try {
       const data = await api.analyzeMessage(message, language);
-      setResult(data);
+      setResult(await attachCommunitySignal(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
