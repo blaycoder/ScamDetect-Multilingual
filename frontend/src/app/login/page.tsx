@@ -1,14 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, LogIn, Chrome } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function LoginPage() {
+function safeNext(path: string | null): string {
+  if (path && path.startsWith("/") && !path.startsWith("//")) {
+    return path;
+  }
+  return "/dashboard";
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +40,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(safeNext(nextPath));
   }
 
   async function handleGoogleLogin() {
@@ -41,7 +50,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}${safeNext(nextPath)}`,
       },
     });
 
@@ -49,7 +58,6 @@ export default function LoginPage() {
       setError(error.message);
       setOauthLoading(false);
     }
-    // OAuth redirects the page — no need to setLoading(false)
   }
 
   return (
@@ -59,7 +67,6 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        {/* Header */}
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(0,240,255,0.3)] bg-[rgba(0,240,255,0.08)]">
@@ -76,9 +83,8 @@ export default function LoginPage() {
         </div>
 
         <div className="glass-panel p-8">
-          {/* Google OAuth */}
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => void handleGoogleLogin()}
             disabled={oauthLoading || loading}
             className="mb-6 flex w-full items-center justify-center gap-2.5 rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] py-2.5 font-mono text-sm text-[#e2e8ff] transition-all hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-50"
           >
@@ -86,7 +92,6 @@ export default function LoginPage() {
             {oauthLoading ? "Redirecting…" : "Continue with Google"}
           </button>
 
-          {/* Divider */}
           <div className="mb-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-[rgba(255,255,255,0.07)]" />
             <span className="font-mono text-xs text-[#3a3a5c] tracking-widest">
@@ -95,8 +100,7 @@ export default function LoginPage() {
             <div className="h-px flex-1 bg-[rgba(255,255,255,0.07)]" />
           </div>
 
-          {/* Email / Password form */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={(e) => void handleLogin(e)} className="space-y-4">
             <div>
               <label className="mb-1.5 block font-mono text-xs text-[#6b7280] tracking-widest">
                 EMAIL
@@ -154,7 +158,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Footer links */}
         <p className="mt-6 text-center font-mono text-xs text-[#6b7280]">
           No account?{" "}
           <Link href="/signup" className="text-[#00f0ff] hover:underline">
@@ -167,5 +170,19 @@ export default function LoginPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center font-mono text-sm text-[#6b7280]">
+          Loading...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

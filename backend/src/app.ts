@@ -13,6 +13,7 @@ import userScansRoutes from "./routes/userScans.routes";
 import translationRoutes from "./routes/translation.routes";
 import disclaimerRoutes from "./routes/disclaimer.routes";
 import communityReportRoutes from "./routes/communityReport.routes";
+import adminRoutes from "./routes/admin.routes";
 
 const app = express();
 
@@ -36,7 +37,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -71,6 +72,7 @@ app.use("/api", userScansRoutes); // GET /api/user/scans — requires auth
 app.use("/api", translationRoutes);
 app.use("/api", disclaimerRoutes);
 app.use("/api", communityReportRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req, res) => {

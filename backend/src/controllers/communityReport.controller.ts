@@ -1,16 +1,13 @@
 import { Request, Response } from "express";
-import { body, param, query } from "express-validator";
+import { body, query } from "express-validator";
 import { validateRequest } from "../middleware/validate";
 import {
   checkApprovedReports,
   insertCommunityReport,
-  listAdminReports,
   listPublicApprovedReports,
   normalizeReportedValue,
-  updateReportStatus,
   uploadScreenshot,
   validateReportedValue,
-  type CommunityReportStatus,
   type CommunityReportType,
 } from "../services/communityReportService";
 
@@ -68,25 +65,6 @@ export const checkReportValidators = [
 export const publicListValidators = [
   query("page").optional().isInt({ min: 1 }).toInt(),
   query("limit").optional().isInt({ min: 1, max: 50 }).toInt(),
-  validateRequest,
-];
-
-export const adminListValidators = [
-  query("status")
-    .optional()
-    .isIn(["pending", "approved", "rejected"])
-    .withMessage("status must be pending, approved, or rejected"),
-  query("page").optional().isInt({ min: 1 }).toInt(),
-  query("limit").optional().isInt({ min: 1, max: 50 }).toInt(),
-  validateRequest,
-];
-
-export const moderateReportValidators = [
-  param("id").isUUID().withMessage("id must be a valid UUID"),
-  body("status")
-    .isIn(["approved", "rejected"])
-    .withMessage("status must be approved or rejected"),
-  body("moderatorNotes").optional().isString().isLength({ max: 2000 }),
   validateRequest,
 ];
 
@@ -200,57 +178,6 @@ export async function listPublicCommunityReports(
     res.status(500).json({
       status: "error",
       data: { message: "Failed to list public reports" },
-    });
-  }
-}
-
-export async function listAdminCommunityReports(
-  req: Request,
-  res: Response,
-): Promise<void> {
-  const status = (req.query.status as CommunityReportStatus) || "pending";
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 20);
-  try {
-    const result = await listAdminReports(status, page, limit);
-    res.json({ status: "ok", data: result });
-  } catch {
-    res.status(500).json({
-      status: "error",
-      data: { message: "Failed to list admin reports" },
-    });
-  }
-}
-
-export async function moderateCommunityReport(
-  req: Request,
-  res: Response,
-): Promise<void> {
-  const { id } = req.params;
-  const { status, moderatorNotes } = req.body as {
-    status: "approved" | "rejected";
-    moderatorNotes?: string;
-  };
-
-  try {
-    const updated = await updateReportStatus(
-      id,
-      status,
-      req.userId!,
-      moderatorNotes,
-    );
-    if (!updated) {
-      res.status(404).json({
-        status: "error",
-        data: { message: "Report not found" },
-      });
-      return;
-    }
-    res.json({ status: "ok", data: updated });
-  } catch {
-    res.status(500).json({
-      status: "error",
-      data: { message: "Failed to update report" },
     });
   }
 }

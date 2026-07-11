@@ -1,5 +1,8 @@
 import type {
   AdminCommunityReport,
+  AdminRole,
+  AdminStats,
+  AdminUser,
   CommunityReportStatus,
   CommunityReportType,
   CommunitySignal,
@@ -225,6 +228,7 @@ export const api = {
           id: string;
           reporter_user_id: string | null;
           reporter_anon_id: string | null;
+          reporterLabel?: string;
           report_type: CommunityReportType;
           reported_value: string;
           message_content: string | null;
@@ -248,6 +252,7 @@ export const api = {
         id: item.id,
         reporterUserId: item.reporter_user_id,
         reporterAnonId: item.reporter_anon_id,
+        reporterLabel: item.reporterLabel,
         reportType: item.report_type,
         reportedValue: item.reported_value,
         messageContent: item.message_content,
@@ -310,6 +315,88 @@ export const api = {
       reviewedAt: item.reviewed_at,
     };
   },
+
+  /** GET /api/admin/me */
+  adminMe: async (): Promise<{ role: AdminRole }> =>
+    fetch(`${API_URL}/api/admin/me`, {
+      headers: { ...(await authHeaders()) },
+    }).then(handleEnvelopeResponse<{ role: AdminRole }>),
+
+  /** GET /api/admin/stats */
+  adminStats: async (): Promise<AdminStats> =>
+    fetch(`${API_URL}/api/admin/stats`, {
+      headers: { ...(await authHeaders()) },
+    }).then(handleEnvelopeResponse<AdminStats>),
+
+  /** GET /api/admin/admins */
+  listAdmins: async (): Promise<AdminUser[]> => {
+    const data = await fetch(`${API_URL}/api/admin/admins`, {
+      headers: { ...(await authHeaders()) },
+    }).then(
+      handleEnvelopeResponse<{
+        items: Array<{
+          id: string;
+          user_id: string;
+          role: AdminRole;
+          added_by: string | null;
+          created_at: string;
+          email: string | null;
+          addedByEmail: string | null;
+        }>;
+      }>,
+    );
+    return data.items.map((item) => ({
+      id: item.id,
+      userId: item.user_id,
+      role: item.role,
+      addedBy: item.added_by,
+      createdAt: item.created_at,
+      email: item.email,
+      addedByEmail: item.addedByEmail,
+    }));
+  },
+
+  /** POST /api/admin/admins */
+  addAdmin: async (body: {
+    userId?: string;
+    email?: string;
+    role: AdminRole;
+  }): Promise<AdminUser> => {
+    const item = await fetch(`${API_URL}/api/admin/admins`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+      },
+      body: JSON.stringify(body),
+    }).then(
+      handleEnvelopeResponse<{
+        id: string;
+        user_id: string;
+        role: AdminRole;
+        added_by: string | null;
+        created_at: string;
+        email: string | null;
+        addedByEmail: string | null;
+      }>,
+    );
+    return {
+      id: item.id,
+      userId: item.user_id,
+      role: item.role,
+      addedBy: item.added_by,
+      createdAt: item.created_at,
+      email: item.email,
+      addedByEmail: item.addedByEmail,
+    };
+  },
+
+  /** DELETE /api/admin/admins/:userId */
+  removeAdmin: async (userId: string): Promise<{ removed: boolean }> =>
+    fetch(`${API_URL}/api/admin/admins/${userId}`, {
+      method: "DELETE",
+      headers: { ...(await authHeaders()) },
+    }).then(handleEnvelopeResponse<{ removed: boolean }>),
 
   /** GET /api/scam-database */
   getScamDatabase: (): Promise<ScamReport[]> =>

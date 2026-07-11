@@ -79,6 +79,7 @@ export interface AdminCommunityReport {
   id: string;
   reporterUserId: string | null;
   reporterAnonId: string | null;
+  reporterLabel?: string;
   reportType: CommunityReportType;
   reportedValue: string;
   messageContent: string | null;
@@ -90,6 +91,34 @@ export interface AdminCommunityReport {
   moderatorNotes: string | null;
   createdAt: string;
   reviewedAt: string | null;
+}
+
+export type AdminRole = "moderator" | "superadmin";
+
+export interface AdminStats {
+  totalScans: number;
+  urlScans: number;
+  scansBySource: {
+    detectionLogs: number;
+    urlScans: number;
+  };
+  reportsByStatus: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+  reportsLast7Days: number;
+  topReportedValues: Array<{ reportedValue: string; count: number }>;
+}
+
+export interface AdminUser {
+  id: string;
+  userId: string;
+  role: AdminRole;
+  addedBy: string | null;
+  createdAt: string;
+  email: string | null;
+  addedByEmail: string | null;
 }
 
 export interface ScamReport {

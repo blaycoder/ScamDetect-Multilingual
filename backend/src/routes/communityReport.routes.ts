@@ -1,19 +1,14 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import {
-  adminListValidators,
   checkCommunityReports,
   checkReportValidators,
   createCommunityReport,
   createReportValidators,
-  listAdminCommunityReports,
   listPublicCommunityReports,
-  moderateCommunityReport,
-  moderateReportValidators,
   publicListValidators,
 } from "../controllers/communityReport.controller";
 import { optionalAuth } from "../middleware/verifyUser";
-import { requireAdmin } from "../middleware/requireAdmin";
 
 const router = Router();
 
@@ -42,30 +37,12 @@ router.post(
   createCommunityReport,
 );
 
-router.get(
-  "/reports/check",
-  checkReportValidators,
-  checkCommunityReports,
-);
+router.get("/reports/check", checkReportValidators, checkCommunityReports);
 
 router.get(
   "/reports/public",
   publicListValidators,
   listPublicCommunityReports,
-);
-
-router.get(
-  "/admin/reports",
-  requireAdmin,
-  adminListValidators,
-  listAdminCommunityReports,
-);
-
-router.patch(
-  "/admin/reports/:id",
-  requireAdmin,
-  moderateReportValidators,
-  moderateCommunityReport,
 );
 
 export default router;

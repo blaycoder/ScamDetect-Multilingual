@@ -234,7 +234,11 @@ export async function listAdminReports(
   status: CommunityReportStatus,
   page: number,
   limit: number,
-): Promise<{ items: CommunityReportRow[]; page: number; limit: number }> {
+): Promise<{
+  items: Array<CommunityReportRow & { reporterLabel: string }>;
+  page: number;
+  limit: number;
+}> {
   if (!supabase) {
     throw new Error("Database unavailable");
   }
@@ -253,11 +257,25 @@ export async function listAdminReports(
     throw new Error("Failed to list admin reports");
   }
 
-  return {
-    items: (data ?? []) as CommunityReportRow[],
-    page,
-    limit,
-  };
+  const rows = (data ?? []) as CommunityReportRow[];
+  const items = await Promise.all(
+    rows.map(async (row) => {
+      let reporterLabel = "Anonymous";
+      if (row.reporter_user_id) {
+        try {
+          const { data: userData } = await supabase!.auth.admin.getUserById(
+            row.reporter_user_id,
+          );
+          reporterLabel = userData.user?.email ?? row.reporter_user_id;
+        } catch {
+          reporterLabel = row.reporter_user_id;
+        }
+      }
+      return { ...row, reporterLabel };
+    }),
+  );
+
+  return { items, page, limit };
 }
 
 export async function updateReportStatus(

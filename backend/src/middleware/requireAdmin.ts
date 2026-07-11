@@ -1,24 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { supabase } from "../utils/supabase";
 
-/**
- * TODO: replace with real admin auth (role claim / admin allowlist).
- * Until then: verify Bearer token, then always reject with 403 so
- * moderation cannot run without an explicit admin gate.
- * Do not invent a role system here.
- */
-export async function requireAdmin(
+type AdminRole = "moderator" | "superadmin";
+
+async function resolveAdmin(
   req: Request,
   res: Response,
-  _next: NextFunction,
-): Promise<void> {
+): Promise<AdminRole | null> {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
     res.status(401).json({
       status: "error",
       data: { message: "Authentication required" },
     });
-    return;
+    return null;
   }
 
   if (!supabase) {
@@ -26,10 +21,11 @@ export async function requireAdmin(
       status: "error",
       data: { message: "Auth service unavailable" },
     });
-    return;
+    return null;
   }
 
   const token = authHeader.slice(7);
+  let userId: string;
   try {
     const {
       data: { user },
@@ -40,22 +36,77 @@ export async function requireAdmin(
         status: "error",
         data: { message: "Invalid or expired token" },
       });
-      return;
+      return null;
     }
-    req.userId = user.id;
+    userId = user.id;
   } catch {
     res.status(401).json({
       status: "error",
       data: { message: "Token verification failed" },
     });
-    return;
+    return null;
   }
 
-  res.status(403).json({
-    status: "error",
-    data: {
-      message:
-        "Admin access not configured. TODO: wire real admin auth before enabling moderation.",
-    },
-  });
+  const { data, error } = await supabase
+    .from("admin_users")
+    .select("role")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    res.status(403).json({
+      status: "error",
+      data: { message: "Forbidden" },
+    });
+    return null;
+  }
+
+  const role = data.role as AdminRole;
+  if (role !== "moderator" && role !== "superadmin") {
+    res.status(403).json({
+      status: "error",
+      data: { message: "Forbidden" },
+    });
+    return null;
+  }
+
+  req.userId = userId;
+  req.adminRole = role;
+  return role;
+}
+
+/**
+ * Requires a valid JWT and a row in admin_users.
+ * Sets req.userId and req.adminRole.
+ */
+export async function requireAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const role = await resolveAdmin(req, res);
+  if (!role) return;
+  next();
+}
+
+/**
+ * Requires superadmin. Reuses req.adminRole when requireAdmin already ran.
+ */
+export async function requireSuperadmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (!req.adminRole) {
+    const role = await resolveAdmin(req, res);
+    if (!role) return;
+  }
+  if (req.adminRole !== "superadmin") {
+    res.status(403).json({
+      status: "error",
+      data: { message: "Forbidden" },
+    });
+    return;
+  }
+  next();
 }
