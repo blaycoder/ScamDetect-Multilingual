@@ -223,6 +223,18 @@ export default function SignUpPage() {
               <UserPlus className="h-4 w-4" />
               {loading ? "Creating account…" : "Create Account"}
             </button>
+
+            <p className="text-center font-mono text-[11px] leading-relaxed text-[#6b7280]">
+              By creating an account, you agree to our{" "}
+              <Link href="/terms" className="text-[#00f0ff] hover:underline">
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-[#00f0ff] hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </form>
         </div>
 
