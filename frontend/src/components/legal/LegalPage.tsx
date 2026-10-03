@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
 // Update these before going live.
-export const LEGAL_CONTACT_EMAIL = "support@scamdetect.app";
+export const LEGAL_CONTACT_EMAIL = "support@scamdetect.run";
 export const LEGAL_LAST_UPDATED = "October 3, 2026";
 
 export interface LegalSection {
