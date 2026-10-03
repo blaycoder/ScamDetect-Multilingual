@@ -107,8 +107,8 @@ const SECTIONS: LegalSection[] = [
     title: "Third-Party Services",
     body: (
       <p>
-        ScamDetect relies on third-party services such as VirusTotal,
-        PhishTank, Groq, and Supabase. We are not responsible for their
+        ScamDetect relies on third-party services for hosting, AI analysis,
+        threat intelligence, and translation. We are not responsible for their
         availability, accuracy, or practices.
       </p>
     ),

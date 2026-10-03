@@ -21,8 +21,8 @@ const SECTIONS: LegalSection[] = [
         <ul>
           <li>
             <strong>Account details</strong> — your email address and login
-            credentials (handled by our authentication provider, Supabase) if
-            you create an account.
+            credentials (handled by our authentication provider) if you create
+            an account.
           </li>
           <li>
             <strong>Content you submit for analysis</strong> — messages, URLs,
@@ -75,31 +75,30 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          To analyze your content, parts of it may be sent to these providers,
-          each under its own privacy policy:
+          To run the service, parts of your data may be processed by trusted
+          third-party providers, each under its own privacy policy:
         </p>
         <ul>
           <li>
-            <strong>Supabase</strong> — database, file storage, and
-            authentication.
+            <strong>Hosting and storage providers</strong> — database, file
+            storage, and authentication.
           </li>
           <li>
-            <strong>Groq</strong> and <strong>Ollama</strong> — AI models that
-            classify messages.
+            <strong>AI providers</strong> — models that classify messages.
           </li>
           <li>
-            <strong>VirusTotal</strong> and <strong>PhishTank</strong> — check
-            URLs against known threat databases.
+            <strong>Threat intelligence services</strong> — check URLs against
+            known malicious link databases.
           </li>
           <li>
-            <strong>Lingo.dev</strong> — translates results into your chosen
-            language.
+            <strong>Translation providers</strong> — translate results into
+            your chosen language.
           </li>
         </ul>
         <p>
-          Note that URLs submitted to VirusTotal may become visible to its
-          security community. Do not submit links containing personal tokens
-          or passwords.
+          Note that URLs submitted for scanning may be shared with security
+          researchers through these threat intelligence services. Do not
+          submit links containing personal tokens or passwords.
         </p>
       </>
     ),
